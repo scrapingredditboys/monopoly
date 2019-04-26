@@ -1267,6 +1267,10 @@ function popup(HTML, action, option) {
 			$("#popupwrap").hide();
 			$("#popupbackground").fadeOut(400);
 		}).on("click", action);
+        
+        setTimeout(function() {
+            $("#popupclose").click();
+        }, 2000);
 
 	}
 
