@@ -1,22 +1,11 @@
 // The purpose of this AI is not to be a relistic opponant, but to give an example of a vaild AI player.
 function AITest(p) {
-	// When purchasing, what is the least amount of money the user should keep?
-	this.purchaseThreshold = 50;
-	// When buying at home, what is the least amount of money the user should keep?
-	this.housePurchaseThreshold = 100;
-	// If bid needs to be upped, by how much?
-	this.bidUp = 25;
-	// At what value do we consider trade to be good enough?
-	this.tradeAcceptanceThreshold = 25;
-	// At what value is the trade not worthy of countering?
-	this.tradeRejectionThreshold = -50;
-
 	this.alertList = "";
 
 	// This variable is static, it is not related to each instance.
 	this.constructor.count++;
 
-	p.name = "AI Test 1 " + this.constructor.count;
+	p.name = "AI Test " + this.constructor.count;
 
 	// Decide whether to buy a property the AI landed on.
 	// Return: boolean (true to buy).
@@ -26,7 +15,7 @@ function AITest(p) {
 		console.log("buyProperty");
 		var s = square[index];
 
-		if (p.money > s.price + this.purchaseThreshold) {
+		if (p.money > s.price + 50) {
 			return true;
 		} else {
 			return false;
@@ -59,11 +48,11 @@ function AITest(p) {
 
 		console.log(tradeValue);
 
-		var proposedMoney = this.bidUp - tradeValue + money;
+		var proposedMoney = 25 - tradeValue + money;
 
-		if (tradeValue >= this.tradeAcceptanceThreshold) {
+		if (tradeValue > 25) {
 			return true;
-		} else if (tradeValue >= this.tradeRejectionThreshold && initiator.money > proposedMoney) {
+		} else if (tradeValue >= -50 && initiator.money > proposedMoney) {
 
 			return new Trade(initiator, recipient, proposedMoney, property, tradeObj.getCommunityChestJailCard(), tradeObj.getChanceJailCard());
 		}
@@ -106,7 +95,7 @@ function AITest(p) {
 					continue;
 				}
 
-				if (p.money > leastHouseProperty.houseprice + this.housePurchaseThreshold) {
+				if (p.money > leastHouseProperty.houseprice + 100) {
 					buyHouse(leastHouseProperty.index);
 				}
 
