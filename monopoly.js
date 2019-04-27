@@ -19,7 +19,10 @@ function Game() {
 		areDiceRolled = false;
 	};
 
-	this.next = function() {
+	this.next = async function() {
+		while(auctionQueue.length !== 0 || !$("#popupwrap").is(":hidden")){
+			await sleep(500);
+		}
 		if (!p.human && p.money < 0) {
 			p.AI.payDebt();
 
@@ -933,14 +936,16 @@ function Game() {
 				this.acceptTrade(reversedTrade);
 			} else if (tradeResponse === false) {
 				popup("<p>" + recipient.name + " has declined your offer.</p>");
+				this.cancelTrade();
 				return;
 			} else if (tradeResponse instanceof Trade) {
 				popup("<p>" + recipient.name + " has proposed a counteroffer.</p>");
-				writeTrade(tradeResponse);
+				this.trade(tradeResponse);
+				//writeTrade(tradeResponse);
 
-				$("#proposetradebutton, #canceltradebutton").hide();
-				$("#accepttradebutton").show();
-				$("#rejecttradebutton").show();
+				//$("#proposetradebutton, #canceltradebutton").hide();
+				//$("#accepttradebutton").show();
+				//$("#rejecttradebutton").show();
 			}
 		}
 	};
@@ -2311,7 +2316,7 @@ function land(increasedRent) {
 		}
 
 
-		game.addPropertyToAuctionQueue(p.position);
+		//game.addPropertyToAuctionQueue(p.position);
 	}
 
 	// Collect rent
@@ -2633,6 +2638,9 @@ function setup() {
 		} else if (document.getElementById("player" + i + "ai").value === "1") {
 			p.human = false;
 			p.AI = new AITest(p);
+		} else if (document.getElementById("player" + i + "ai").value === "2"){
+			p.human = false;
+			p.AI = new AITest2(p);
 		}
 	}
 
@@ -2663,6 +2671,10 @@ function setup() {
 		// element.checked = true;
 	// }
 // }
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function getCheckedProperty() {
 	for (var i = 0; i < 42; i++) {
@@ -2742,6 +2754,7 @@ window.onload = function() {
 	}
 
 	AITest.count = 0;
+	AITest2.count = 0;
 
 	player[1].human = true;
 	player[0].name = "the bank";
