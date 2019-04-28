@@ -1275,7 +1275,7 @@ function popup(HTML, action, option) {
         
         if(action !== null) {
             setTimeout(function() {
-                console.log(action);
+                //console.log(action);
                 $("#popupclose").click();
             }, 1000);
         }
@@ -2654,6 +2654,9 @@ function setup() {
 		} else if (document.getElementById("player" + i + "ai").value === "2"){
 			p.human = false;
 			p.AI = new AITest2(p);
+		} else if (document.getElementById("player" + i + "ai").value === "3"){
+			p.human = false;
+			p.AI = new AITest3(p);
 		}
 	}
 
@@ -2768,6 +2771,7 @@ window.onload = function() {
 
 	AITest.count = 0;
 	AITest2.count = 0;
+	AITest3.count = 0;
 
 	player[1].human = true;
 	player[0].name = "the bank";

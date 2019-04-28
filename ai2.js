@@ -16,7 +16,7 @@ function AITest2(p) {
 	// This variable is static, it is not related to each instance.
 	this.constructor.count++;
 
-	p.name = "AI Test 2 " + this.constructor.count;
+	p.name = "AI 2 Player " + this.constructor.count;
 
 	// Decide whether to buy a property the AI landed on.
 	// Return: boolean (true to buy).

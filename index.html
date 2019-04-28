@@ -10,6 +10,7 @@
 	<!-- <script type="text/javascript" src="newyorkcityedition.js"></script> -->
 	<script type="text/javascript" src="ai.js"></script>
 	<script type="text/javascript" src="ai2.js"></script>
+	<script type="text/javascript" src="ai3.js"></script>
 	<script type="text/javascript" src="monopoly.js"></script>
 	<link rel="stylesheet" type="text/css" href="styles.css" />
 </head>
@@ -232,13 +233,17 @@
 						<div>$<span id="p7money">1500</span></div>
 					</td>
 				</tr>
-				<tr id="moneybarrow8">
-					<td style="border: none;" class="moneybararrowcell">&nbsp;</td>
-					<td style="border: none;">
-						<input type="button" id="viewstats" value="View stats" title="View a pop-up window that shows a list of each player's properties." />
-					</td>
-				</tr>
+				<tr id="moneybarrow8" class="money-bar-row">
+						<td class="moneybararrowcell"><img src="images/arrow.png" id="p8arrow" class="money-bar-arrow" alt=">" /></td>
+						<td id="p8moneybar" class="moneybarcell">
+							<div><span id="p8moneyname" >Player 7</span>:</div>
+							<div>$<span id="p8money">1500</span></div>
+						</td>
+					</tr>
 			</table>
+			<tr id="showStats">
+					<button onclick="showStats()">Show statistics</button>
+			</tr>
 		</div>
 	</div>
 
@@ -280,11 +285,12 @@
 				<option value="0" selected="selected">Human</option>
 				<option value="1">AI 1</option>
 				<option value="2">AI 2</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
 		<div id="player2input" class="player-input">
-			Player 2: <input type="text" id="player2name" title="Player name" maxlength="16" value="Player 2" />
+			Player 2: <input type="text" id="player2name" title="Player name" maxlength="16" value="Player 2" disabled=true/>
 			<select id="player2color" title="Player color">
 				<option style="color: aqua;">Aqua</option>
 				<option style="color: black;">Black</option>
@@ -304,14 +310,15 @@
 				<option style="color: yellow;">Yellow</option>
 			</select>
 			<select id="player2ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player2name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI 1</option>
+				<option value="0">Human</option>
+				<option value="1" selected="selected">AI 1</option>
 				<option value="2">AI 2</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
 		<div id="player3input" class="player-input">
-			Player 3: <input type="text" id="player3name" title="Player name" maxlength="16" value="Player 3" />
+			Player 3: <input type="text" id="player3name" title="Player name" maxlength="16" value="Player 3" disabled=true/>
 			<select id="player3color" title="Player color">
 				<option style="color: aqua;">Aqua</option>
 				<option style="color: black;">Black</option>
@@ -331,14 +338,15 @@
 				<option style="color: yellow;">Yellow</option>
 			</select>
 			<select id="player3ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player3name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
+				<option value="0">Human</option>
 				<option value="1">AI 1</option>
-				<option value="2">AI 2</option>
+				<option value="2" selected="selected">AI 2</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
 		<div id="player4input" class="player-input">
-			Player 4: <input type="text" id="player4name" title="Player name" maxlength="16" value="Player 4" />
+			Player 4: <input type="text" id="player4name" title="Player name" maxlength="16" value="Player 4" disabled=true/>
 			<select id="player4color" title="Player color">
 				<option style="color: aqua;">Aqua</option>
 				<option style="color: black;">Black</option>
@@ -361,6 +369,7 @@
 				<option value="0" selected="selected">Human</option>
 				<option value="1">AI 1</option>
 				<option value="2">AI 2</option>
+				<option value="3" selected="selected">AI 3</option>
 			</select>
 		</div>
 
@@ -388,6 +397,7 @@
 				<option value="0" selected="selected">Human</option>
 				<option value="1">AI 1</option>
 				<option value="2">AI 2</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
@@ -415,6 +425,7 @@
 				<option value="0" selected="selected">Human</option>
 				<option value="1">AI 1</option>
 				<option value="2">AI 2</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
@@ -442,6 +453,7 @@
 				<option value="0" selected="selected">Human</option>
 				<option value="1">AI 1</option>
 				<option value="2">AI 2</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
@@ -469,6 +481,7 @@
 				<option value="0" selected="selected">Human</option>
 				<option value="1">AI 1</option>
 				<option value="2">AI 2</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 

@@ -1,34 +1,52 @@
 // The purpose of this AI is not to be a relistic opponant, but to give an example of a vaild AI player.
-function AITest(p) {
+function AITest3(p) {
 	// When purchasing, what is the least amount of money the user should keep?
-	this.purchaseThreshold = 50;
+	this.purchaseThreshold = 10;
 	// When buying at home, what is the least amount of money the user should keep?
-	this.housePurchaseThreshold = 100;
+	this.housePurchaseThreshold = 10;
 	// If bid needs to be upped, by how much?
-	this.bidUp = 25;
+	this.bidUp = 30;
 	// At what value do we consider trade to be good enough?
-	this.tradeAcceptanceThreshold = 25;
+	this.tradeAcceptanceThreshold = 0;
 	// At what value is the trade not worthy of countering?
-	this.tradeRejectionThreshold = -50;
+	this.tradeRejectionThreshold = -100;
 
 	this.alertList = "";
+
+	//Trade rejection amount
+	this.amountOfRejections = 0;
+	this.currentTileTrade = [];
 
 	// This variable is static, it is not related to each instance.
 	this.constructor.count++;
 
-	p.name = "AI 1 Player " + this.constructor.count;
+	p.name = "AI 3 Player " + this.constructor.count;
 
 	// Decide whether to buy a property the AI landed on.
 	// Return: boolean (true to buy).
 	// Arguments:
 	// index: the property's index (0-39).
 	this.buyProperty = function(index) {
-		console.log("buyProperty");
+		//console.log("buyProperty");
 		var s = square[index];
 
 		if (p.money > s.price + this.purchaseThreshold) {
-			return true;
+			if (index==5 || index==15 || index==25 || index==35 /*railroads*/|| index==12 /*electric company*/ || index==28 /*waterworks*/)
+				return true;
+			else {
+				//Favor more expensive buildings
+				var randomValue = Math.floor(Math.random() * 60);
+				//35% odds on the first building, 100% odds on the final one
+				if (index+20>=randomValue) {
+					console.log("Bought property " + s.name + "!");
+					return true;
+				} else {
+					console.log("Decided not to buy");
+					return false;
+				}
+			}
 		} else {
+			console.log("Not enough money to buy");
 			return false;
 		}
 
@@ -39,7 +57,7 @@ function AITest(p) {
 	// Arguments:
 	// tradeObj: the proposed trade, an instanceof Trade, has the AI as the recipient.
 	this.acceptTrade = function(tradeObj) {
-		console.log("acceptTrade");
+		//console.log("acceptTrade");
 
 		var tradeValue = 0;
 		var money = tradeObj.getMoney();
@@ -57,14 +75,14 @@ function AITest(p) {
 			tradeValue += tradeObj.getProperty(i) * square[i].price * (square[i].mortgage ? 0.5 : 1);
 		}
 
-		console.log(tradeValue);
+		console.log("Trading loss/gain: " + tradeValue);
 
 		var proposedMoney = this.bidUp - tradeValue + money;
 
 		if (tradeValue >= this.tradeAcceptanceThreshold) {
+			console.log("Traded!");
 			return true;
-		} else if (tradeValue >= this.tradeRejectionThreshold && initiator.money > proposedMoney) {
-
+		} else if (tradeValue >= this.tradeRejectionThreshold && initiator.money > proposedMoney) {	
 			return new Trade(initiator, recipient, proposedMoney, property, tradeObj.getCommunityChestJailCard(), tradeObj.getChanceJailCard());
 		}
 
@@ -74,12 +92,14 @@ function AITest(p) {
 	// This function is called at the beginning of the AI's turn, before any dice are rolled. The purpose is to allow the AI to manage property and/or initiate trades.
 	// Return: boolean: Must return true if and only if the AI proposed a trade.
 	this.beforeTurn = function() {
-		console.log("beforeTurn");
+		//console.log("AI 3!");
+		//console.log("beforeTurn");
 		var s;
 		var allGroupOwned;
 		var max;
 		var leastHouseProperty;
 		var leastHouseNumber;
+		var amountOfRejections;
 
 		// Buy houses.
 		for (var i = 0; i < 40; i++) {
@@ -107,6 +127,7 @@ function AITest(p) {
 				}
 
 				if (p.money > leastHouseProperty.houseprice + this.housePurchaseThreshold) {
+					console.log("Bought house!");
 					buyHouse(leastHouseProperty.index);
 				}
 
@@ -132,12 +153,13 @@ function AITest(p) {
 	// This function is called every time the AI lands on a square. The purpose is to allow the AI to manage property and/or initiate trades.
 	// Return: boolean: Must return true if and only if the AI proposed a trade.
 	this.onLand = function() {
-		console.log("onLand");
+		//console.log("onLand");
 		var proposedTrade;
 		var property = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 		var railroadIndexes = [5, 15, 25, 35];
 		var requestedRailroad;
-		var offeredUtility;
+		var offeredUtility = 0;
+		var indexOfValueToTrade = 0;
 		var s;
 
 		// If AI owns exactly one utility, try to trade it for a railroad.
@@ -147,6 +169,85 @@ function AITest(p) {
 			if (s.owner !== 0 && s.owner !== p.index) {
 				requestedRailroad = s.index;
 				break;
+			}
+		}
+
+		//Check if trade was a success
+		if (typeof this.currentTileTrade[1] !== 'undefined' && square[this.currentTileTrade[1]].owner == p.index) {
+			this.amountOfRejections = 0;
+			this.currentTileTrade = [];
+			console.log("Trade succeeded!");
+		}
+
+		//Check if it's worth to trade properties
+		for (var i=0; i<40; i++) {
+			s = square[i];
+			
+			if (typeof s.group !== 'undefined')  {
+				var sum = 0;
+				//Find if a person owns all propertes but one
+				s.group.forEach(function(element) {
+					if (square[element].owner == p.index) {
+						sum++;
+					} else {
+						indexOfValueToTrade = element;
+					}
+				});
+
+				//Attempt to find a spot it already owns to trade with other player
+				if (sum == s.group.length-1 && square[indexOfValueToTrade].owner != 0 && square[indexOfValueToTrade].mortgage == false) {
+					console.log("Found a group of n-1! " + s.group);
+
+					//Find out if he has any properties he would like to give away, make it fair
+					var j = Math.max(i-10, 1);
+					for (j; j<40; j++) {
+						var sj = square[j];
+						if (typeof sj.group !== 'undefined') {
+							var sum2 = 0;
+							//Find if he owns any property from a group that has exactly one property
+							sj.group.forEach(function(element) {
+								if (square[element].owner == p.index) {
+									sum2++;
+								}
+							}); 
+							//And don't make it a railroad, this is in a different spot below
+							if (sum2 < sj.group.length-1) {
+								if (j!=5 && j!=15 && j!=25 && j!=35) {
+									offeredUtility = j;
+									break;
+								}	
+							}
+						}
+					}
+					console.log("Offered utility = " + offeredUtility);
+					//Keep increasing the value of a bid until the other side agrees
+					var differenceInMoneyCosts = Math.max(square[indexOfValueToTrade].price-square[offeredUtility].price+this.bidUp*this.amountOfRejections, 0);
+					//Finally run the trade
+					if (offeredUtility!=0 && square[offeredUtility].mortgage==false && p.money>=differenceInMoneyCosts + this.tradeAcceptanceThreshold) {
+						//console.log(p.money + " " + differenceInMoneyCosts + " " + this.tradeAcceptanceThreshold);
+						if (typeof this.currentTileTrade[0] !== 'undefined' && this.currentTileTrade[0]!=indexOfValueToTrade && this.amountOfRejections!=0) {
+							//It always attempts to follow the same trade
+							break;
+						} else {
+							//Register as a new trade
+							this.currentTileTrade[0] = indexOfValueToTrade, 
+							this.currentTileTrade[1] = offeredUtility
+						}
+
+						//Propose a new trade
+						property[indexOfValueToTrade] = -1;
+						property[offeredUtility] = 1;	
+						console.log("Trading " + square[indexOfValueToTrade].name + " for your " + square[offeredUtility].name);
+						proposedTrade = new Trade(p, player[square[indexOfValueToTrade].owner], differenceInMoneyCosts, property, 0, 0);
+						this.amountOfRejections++;
+
+						game.trade(proposedTrade);
+						return true;
+					} else {
+						console.log("But not enough money!");
+						break;
+					}
+				}
 			}
 		}
 
@@ -162,7 +263,18 @@ function AITest(p) {
 			property[offeredUtility] = 1;
 
 			proposedTrade = new Trade(p, player[square[requestedRailroad].owner], 0, property, 0, 0)
+			console.log("Trying to buy railroads!");
+			game.trade(proposedTrade);
+			return true;
+		}
 
+		if (utilityForRailroadFlag && game.getDie(1) !== game.getDie(2) && requestedRailroad && offeredUtility) {
+			utilityForRailroadFlag = false;
+			property[requestedRailroad] = -1;
+			property[offeredUtility] = 1;
+
+			proposedTrade = new Trade(p, player[square[requestedRailroad].owner], 0, property, 0, 0)
+			console.log("Trying to buy railroads!");
 			game.trade(proposedTrade);
 			return true;
 		}
