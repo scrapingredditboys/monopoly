@@ -1238,9 +1238,9 @@ function addAlert(alertText) {
 
 function popup(HTML, action, option) {
 	document.getElementById("popuptext").innerHTML = HTML;
-	document.getElementById("popup").style.width = "300px";
-	document.getElementById("popup").style.top = "0px";
-	document.getElementById("popup").style.left = "0px";
+	//document.getElementById("popup").style.width = "300px";
+	//document.getElementById("popup").style.top = "0px";
+	//document.getElementById("popup").style.left = "0px";
 
 	if (!option && typeof action === "string") {
 		option = action;
@@ -1273,16 +1273,19 @@ function popup(HTML, action, option) {
 			$("#popupbackground").fadeOut(400);
 		}).on("click", action);
         
-        setTimeout(function() {
-            $("#popupclose").click();
-        }, 2000);
+        if(action !== null) {
+            setTimeout(function() {
+                console.log(action);
+                $("#popupclose").click();
+            }, 1000);
+        }
 
 	}
 
 	// Show using animation.
-	$("#popupbackground").fadeIn(400, function() {
-		$("#popupwrap").show();
-	});
+	//$("#popupbackground").fadeIn(400, function() {
+	//	$("#popupwrap").show();
+	//});
 
 }
 
@@ -1772,11 +1775,16 @@ function chanceAction(chanceIndex) {
 	chanceCards[chanceIndex].action(p);
 
 	updateMoney();
+    
+    console.log("CHANCE INDEX!!!!! " + chanceIndex);
 
 	if (chanceIndex !== 15 && !p.human) {
 		p.AI.alertList = "";
-		game.next();
+		//game.next();
 	}
+    if([0, 1, 2, 3, 6, 8, 12].includes(chanceIndex)) {
+        game.next();
+    }
 }
 
 function communityChestAction(communityChestIndex) {
@@ -1788,10 +1796,15 @@ function communityChestAction(communityChestIndex) {
 
 	updateMoney();
 
+    console.log("COMMUNITY INDEX!!!!! " + communityChestIndex);
+    
 	if (communityChestIndex !== 15 && !p.human) {
 		p.AI.alertList = "";
-		game.next();
+		//game.next();
 	}
+    if(!([13, 15].includes(communityChestIndex))) {
+        game.next();
+    }
 }
 
 function addamount(amount, cause) {
@@ -3029,3 +3042,6 @@ window.onload = function() {
 
 
 };
+function STOP() {
+    turn = -1;
+}
