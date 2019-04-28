@@ -3044,6 +3044,15 @@ window.onload = function() {
 
 	$("#trade-menu-item").click(game.trade);
 
+    for(let i = 0; i < 40; i++) {
+        let c = square[i].color;
+        if(c !== '#FFFFFF') {
+            document.querySelector('#cell'+i).style.backgroundColor = 'rgba('+(parseInt(c.substr(1,2),16))+','+(parseInt(c.substr(3,2),16))+','+(parseInt(c.substr(5,2),16))+',0.25)';
+        }
+        else {
+            document.querySelector('#cell'+i).style.backgroundColor = c;
+        }
+    }
 
 };
 function STOP() {

@@ -1,5 +1,5 @@
 body {
-	background: #FFFFFF;
+	background: #ddd;
 	margin: 0px;
 	min-width: 1075px;
 }
@@ -19,7 +19,7 @@ td {
 #moneybar {
 	float: right;
 	border: 0px solid black;
-	background-color: white;
+	background-color: #ddd;
 	margin: 15px;
 	border-radius: 5px;
 	display: none;
@@ -99,6 +99,7 @@ td {
 	margin: 5px;
 	padding: 3px;
 	width: 80px;
+    border-radius: 10px;
 }
 
 #pname {
@@ -117,7 +118,7 @@ td {
 
 #alert {
 	width: 307px;
-	height: 92px;
+	height: 200px;
 	margin: 0px;
 	padding-left: 1px;
 	border: 1px solid gray;
@@ -259,6 +260,27 @@ td {
 	/* background-repeat: repeat-x; */
 	overflow: hidden;
 }
+
+#nextbutton {
+	padding: 0px;
+	text-align: center;
+	font-family: arial, sans-serif;
+	color: white;
+	font-weight: bold;
+	font-size: 12px;
+	border: 1px solid blue;
+	border-radius: 5px;
+	height: 30px;
+	width: 25%;
+	margin: 0px;
+	background-color: #305BC9;
+	/* background-image: -webkit-linear-gradient(bottom,#213EB2,#4787ED);
+	background-image: -moz-linear-gradient(bottom,#213EB2,#4787ED); */
+	background-image: url(images/menu_background.png);
+	/* background-repeat: repeat-x; */
+	overflow: hidden;
+}
+
 
 #menutable td {
 	vertical-align: top;
@@ -652,10 +674,11 @@ td {
 .moneybarcell {
 	width: 83px;
 	min-width: 83px;
+    border-radius: 10px;
 }
 
 .moneybararrowcell {
-	background: white;
+	background: #ddd;
 	width: 30px;
 	border: none;
 	text-align: right;
@@ -822,4 +845,99 @@ td {
 	top: 0px;
 	width: 15px;
 
+}
+
+#setup {
+    display: block;
+    border: 4px solid #000;
+    border-radius: 50px;
+    background-color: #ccc;
+    font-size: 16px;
+    width: 600px;
+    margin: 30px auto;
+    padding: 30px;
+    font-size: 20px;
+}
+
+#setup select {
+    height: 28px;
+    border-radius: 10px;
+    font-size: 20px;
+    padding: 2px;
+}
+
+#setup div {
+    margin-top: 10px;
+}
+
+#setup input {
+    font-size: 20px;
+    border-radius: 10px;
+    border-style: inset;
+    padding: 4px;
+}
+
+#setup input[type="button"] {
+    border: 2px ridge #999;
+    padding: 5px;
+    background-color: #bbb;
+}
+
+#setup input[type="button"]:hover {
+    background-color: #aaa;
+}
+
+#cell20 {
+    background-image: url("images/free_parking_icon.png");
+    background-size: auto 50px;
+    background-position: center 0;
+}
+
+#cell5, #cell15, #cell25, #cell35 {
+    background-image: url("images/train_icon.png");
+    background-size: auto 50px;
+    background-position: center 0;
+}
+
+#cell2, #cell17, #cell33 {
+    background-image: url("images/community_chest_icon.png");
+    background-size: auto 50px;
+    background-position: center 0;
+}
+
+#cell38 {
+    background-image: url("images/tax_icon.png");
+    background-size: auto 50px;
+    background-position: center 0;
+}
+
+#cell7, #cell22, #cell36 {
+    background-image: url("images/chance_icon.png");
+    background-size: auto 50px;
+    background-position: center 0;
+}
+
+#cell12 {
+    background-image: url("images/electric_icon.png");
+    background-size: auto 50px;
+    background-position: center 0;
+}
+
+#cell28 {
+    background-image: url("images/water_icon.png");
+    background-size: auto 50px;
+    background-position: center 0;
+}
+
+#jail {
+    background-image: url("images/jake_icon.png");
+    background-size: auto 50px;
+    background-position: center 12px;
+    background-repeat: no-repeat;
+}
+
+#cell0 {
+    background-image: url("images/arrow_icon.png");
+    background-size: 100% 50px;
+    background-position: center 20px;
 }
