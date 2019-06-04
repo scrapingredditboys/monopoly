@@ -10,12 +10,26 @@ function AITest3(p) {
 	this.tradeAcceptanceThreshold = 0;
 	// At what value is the trade not worthy of countering?
 	this.tradeRejectionThreshold = -100;
+	// How many spots behind is the agent willing to trade?
+	this.spotsBehind = 10;
+	// How many spots in front of is the agent willing to trade?
+	this.spotsAhead = 10;
+	// Value of a Community Get Out Of Jail Card
+	this.communityChestJailCardValue = 10;
+	// Value of a Chance Get Out of Jail Card
+	this.chanceJailCardValue = 10;
+
+	// Trade rejection amount
+	this.amountOfRejections = 0;
+	// Cap maximal amount of rejections
+	this.maxAmountOfRejections = 3;
 
 	this.alertList = "";
 
-	//Trade rejection amount
-	this.amountOfRejections = 0;
 	this.currentTileTrade = [];
+
+	// Blacklist of spots that you do not want to exchange because of maxAmountOfRejections for example 
+	this.doNotOfferThose = [];
 
 	// This variable is static, it is not related to each instance.
 	this.constructor.count++;
@@ -65,8 +79,8 @@ function AITest3(p) {
 		var recipient = tradeObj.getRecipient();
 		var property = [];
 
-		tradeValue += 10 * tradeObj.getCommunityChestJailCard();
-		tradeValue += 10 * tradeObj.getChanceJailCard();
+		tradeValue += this.communityChestJailCardValue * tradeObj.getCommunityChestJailCard();
+		tradeValue += this.chanceJailCardValue * tradeObj.getChanceJailCard();
 
 		tradeValue += money;
 
@@ -176,6 +190,8 @@ function AITest3(p) {
 		if (typeof this.currentTileTrade[1] !== 'undefined' && square[this.currentTileTrade[1]].owner == p.index) {
 			this.amountOfRejections = 0;
 			this.currentTileTrade = [];
+			// We can check the trade again after a couple of offers have been made
+			this.doNotOfferThose = [];
 			console.log("Trade succeeded!");
 		}
 
@@ -199,8 +215,14 @@ function AITest3(p) {
 					console.log("Found a group of n-1! " + s.group);
 
 					//Find out if he has any properties he would like to give away, make it fair
-					var j = Math.max(i-10, 1);
-					for (j; j<40; j++) {
+					var j = Math.max(i-this.spotsBehind, 1);
+					for (j; j<j+this.spotsAhead+this.spotsBehind; j++) {
+
+						//If it gets out of bounds, finish the search
+						if (j>40) break;
+						//If the value was blacklisted, don't consider it
+						if (this.doNotOfferThose.includes(j)) continue;
+
 						var sj = square[j];
 						if (typeof sj.group !== 'undefined') {
 							var sum2 = 0;
@@ -223,7 +245,7 @@ function AITest3(p) {
 					//Keep increasing the value of a bid until the other side agrees
 					var differenceInMoneyCosts = Math.max(square[indexOfValueToTrade].price-square[offeredUtility].price+this.bidUp*this.amountOfRejections, 0);
 					//Finally run the trade
-					if (offeredUtility!=0 && square[offeredUtility].mortgage==false && p.money>=differenceInMoneyCosts + this.tradeAcceptanceThreshold) {
+					if (offeredUtility!=0 && square[offeredUtility].mortgage==false && p.money>=differenceInMoneyCosts + this.tradeAcceptanceThreshold && this.amountOfRejections < this.maxAmountOfRejections) {
 						//console.log(p.money + " " + differenceInMoneyCosts + " " + this.tradeAcceptanceThreshold);
 						if (typeof this.currentTileTrade[0] !== 'undefined' && this.currentTileTrade[0]!=indexOfValueToTrade && this.amountOfRejections!=0) {
 							//It always attempts to follow the same trade
@@ -243,8 +265,13 @@ function AITest3(p) {
 
 						game.trade(proposedTrade);
 						return true;
+					} else if (this.amountOfRejections >= this.maxAmountOfRejections) {
+						console.log("Too many rejections...");
+						this.amountOfRejections = 0;
+						this.doNotOfferThose.push(indexOfValueToTrade);
+						break;
 					} else {
-						console.log("But not enough money!");
+						console.log("Not enough money...");
 						break;
 					}
 				}

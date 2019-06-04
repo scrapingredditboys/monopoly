@@ -21,7 +21,7 @@ function Game() {
 
 	this.next = async function() {
 		while(auctionQueue.length !== 0 || !$("#popupwrap").is(":hidden")){
-			await sleep(500);
+			await sleep(10);
 		}
 		if (!p.human && p.money < 0) {
 			p.AI.payDebt();
@@ -986,6 +986,11 @@ function Game() {
 			$("#control").hide();
 			$("#board").hide();
 			$("#refresh").show();
+			
+			setTimeout(function() {
+				onloadBehavior();
+				setup();
+			}, 5000);
 
 			// // Display land counts for survey purposes.
 			// var text;
@@ -997,8 +1002,7 @@ function Game() {
 			// }
 			// document.getElementById("refresh").innerHTML += "<br><br><div><textarea type='text' style='width: 980px;' onclick='javascript:select();' />" + text + "</textarea></div>";
 
-			popup("<p>Congratulations, " + player[1].name + ", you have won the game.</p><div>");
-
+			document.getElementById("refresh").innerHTML = ("<p>Congratulations, " + player[1].name + " has won the game.</p><div>The game will restart in 5 seconds.</div>");
 		} else {
 			play();
 		}
@@ -2642,7 +2646,6 @@ function setup() {
 	for (var i = 1; i <= pcount; i++) {
 		p = player[playerArray[i - 1]];
 
-
 		p.color = document.getElementById("player" + i + "color").value.toLowerCase();
 
 		if (document.getElementById("player" + i + "ai").value === "0") {
@@ -2662,6 +2665,7 @@ function setup() {
 
 	$("#board, #moneybar").show();
 	$("#setup").hide();
+	$("#refresh").hide();
 
 	if (pcount === 2) {
 		document.getElementById("stats").style.width = "454px";
@@ -2671,7 +2675,7 @@ function setup() {
 
 	document.getElementById("stats").style.top = "0px";
 	document.getElementById("stats").style.left = "0px";
-
+	console.log("Starting the game!");
 	play();
 }
 
@@ -2736,8 +2740,9 @@ function menuitem_onmouseout(element) {
 	return;
 }
 
-window.onload = function() {
+function onloadBehavior() {
 	game = new Game();
+	redefineGame();
 
 	for (var i = 0; i <= 8; i++) {
 		player[i] = new Player("", "");
@@ -2781,7 +2786,6 @@ window.onload = function() {
 
 	communityChestCards.deck = [];
 	chanceCards.deck = [];
-
 	for (var i = 0; i < 16; i++) {
 		chanceCards.deck[i] = i;
 		communityChestCards.deck[i] = i;
@@ -2822,6 +2826,7 @@ window.onload = function() {
 		s = square[i];
 
 		currentCell = document.getElementById("cell" + i);
+		currentCell.innerHTML = "";
 
 		currentCellAnchor = currentCell.appendChild(document.createElement("div"));
 		currentCellAnchor.id = "cell" + i + "anchor";
@@ -3055,6 +3060,9 @@ window.onload = function() {
     }
 
 };
+
+window.onload = onloadBehavior;
+
 function STOP() {
     turn = -1;
 }
