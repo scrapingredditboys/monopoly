@@ -23,6 +23,10 @@ function AITest3(p) {
 	this.amountOfRejections = 0;
 	// Cap maximal amount of rejections
 	this.maxAmountOfRejections = 3;
+	//Odds of buying the first buildings
+	this.firstBuildingOdds = 35;
+	//Odds of buying the last buildings
+	this.lastBuildingOdds = 100;
 
 	this.alertList = "";
 
@@ -49,9 +53,11 @@ function AITest3(p) {
 				return true;
 			else {
 				//Favor more expensive buildings
-				var randomValue = Math.floor(Math.random() * 60);
+				var randomValue = Math.floor(Math.random() * 100);
+				//How likely is the bot to buy the property
+				var indexCoefficient = index/40 * (this.lastBuildingOdds - this.firstBuildingOdds);
 				//35% odds on the first building, 100% odds on the final one
-				if (index+20>=randomValue) {
+				if (this.firstBuildingOdds+indexCoefficient>=randomValue) {
 					console.log("Bought property " + s.name + "!");
 					return true;
 				} else {
