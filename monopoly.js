@@ -2072,7 +2072,8 @@ function buyHouse(index) {
 
 			} else {
 				sq.house++;
-				addAlert(p.name + " placed a house on " + sq.name + ".");
+				console.log(p.name + " placed a house on " + sq.name + ".");
+				document.getElementById("cell" + index + "owner").innerHTML += '<div class="cell-position" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
 			}
 
 		} else {
@@ -2082,7 +2083,8 @@ function buyHouse(index) {
 			} else {
 				sq.house = 5;
 				sq.hotel = 1;
-				addAlert(p.name + " placed a hotel on " + sq.name + ".");
+				console.log(p.name + " placed a hotel on " + sq.name + ".");
+				document.getElementById("cell" + index + "owner").innerHTML = '<div class="cell-position" title="house" style="display: inline-block;background-color: red; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
 			}
 		}
 
@@ -2802,6 +2804,7 @@ function onloadBehavior() {
 	$("#noscript").hide();
 	$("#setup, #noF5").show();
 
+	$('#enlargeWrap').remove();
 	var enlargeWrap = document.body.appendChild(document.createElement("div"));
 
 	enlargeWrap.id = "enlarge-wrap";
