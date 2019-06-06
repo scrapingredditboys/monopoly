@@ -19,7 +19,10 @@ function Game() {
 		areDiceRolled = false;
 	};
 
-	this.next = function() {
+	this.next = async function() {
+		while(auctionQueue.length !== 0 || !$("#popupwrap").is(":hidden")){
+			await sleep(10);
+		}
 		if (!p.human && p.money < 0) {
 			p.AI.payDebt();
 
@@ -933,14 +936,16 @@ function Game() {
 				this.acceptTrade(reversedTrade);
 			} else if (tradeResponse === false) {
 				popup("<p>" + recipient.name + " has declined your offer.</p>");
+				this.cancelTrade();
 				return;
 			} else if (tradeResponse instanceof Trade) {
 				popup("<p>" + recipient.name + " has proposed a counteroffer.</p>");
-				writeTrade(tradeResponse);
+				this.trade(tradeResponse);
+				//writeTrade(tradeResponse);
 
-				$("#proposetradebutton, #canceltradebutton").hide();
-				$("#accepttradebutton").show();
-				$("#rejecttradebutton").show();
+				//$("#proposetradebutton, #canceltradebutton").hide();
+				//$("#accepttradebutton").show();
+				//$("#rejecttradebutton").show();
 			}
 		}
 	};
@@ -981,6 +986,11 @@ function Game() {
 			$("#control").hide();
 			$("#board").hide();
 			$("#refresh").show();
+			
+			setTimeout(function() {
+				onloadBehavior();
+				setup();
+			}, 5000);
 
 			// // Display land counts for survey purposes.
 			// var text;
@@ -991,9 +1001,29 @@ function Game() {
 					// text += " " + square[i].landcount;
 			// }
 			// document.getElementById("refresh").innerHTML += "<br><br><div><textarea type='text' style='width: 980px;' onclick='javascript:select();' />" + text + "</textarea></div>";
+            const gameResults = [];
+            console.log(playersGame);
+            for(let p of playersGame) {
+                if(p.AI.params) {
+                    const pl = {
+                        params: p.AI.params,
+                        result: (p === player[1]) ? "win" : "lose"
+                    };
+                    gameResults.push(pl);
+                }
+            }
+            console.log(gameResults);
+            if(localStorage.getItem('gameHistory')) {
+                let gameHistory = JSON.parse(localStorage.getItem('gameHistory'));
+                gameHistory.push(gameResults);
+                localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+            } else {
+                let gameHistory = [];
+                gameHistory.push(gameResults);
+                localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+            }
 
-			popup("<p>Congratulations, " + player[1].name + ", you have won the game.</p><div>");
-
+			document.getElementById("refresh").innerHTML = ("<p>Congratulations, " + player[1].name + " has won the game.</p><div>The game will restart in 5 seconds.</div>");
 		} else {
 			play();
 		}
@@ -1106,7 +1136,6 @@ function Game() {
 
 var game;
 
-
 function Player(name, color) {
 	this.name = name;
 	this.color = color;
@@ -1175,6 +1204,7 @@ function Trade(initiator, recipient, money, property, communityChestJailCard, ch
 }
 
 var player = [];
+var playersGame = [];
 var pcount;
 var turn = 0, doublecount = 0;
 // Overwrite an array with numbers from one to the array's length in a random order.
@@ -1233,9 +1263,9 @@ function addAlert(alertText) {
 
 function popup(HTML, action, option) {
 	document.getElementById("popuptext").innerHTML = HTML;
-	document.getElementById("popup").style.width = "300px";
-	document.getElementById("popup").style.top = "0px";
-	document.getElementById("popup").style.left = "0px";
+	//document.getElementById("popup").style.width = "300px";
+	//document.getElementById("popup").style.top = "0px";
+	//document.getElementById("popup").style.left = "0px";
 
 	if (!option && typeof action === "string") {
 		option = action;
@@ -1268,16 +1298,19 @@ function popup(HTML, action, option) {
 			$("#popupbackground").fadeOut(400);
 		}).on("click", action);
         
-        setTimeout(function() {
-            $("#popupclose").click();
-        }, 2000);
+        if(action !== null) {
+            setTimeout(function() {
+                //console.log(action);
+                $("#popupclose").click();
+            }, 1000);
+        }
 
 	}
 
 	// Show using animation.
-	$("#popupbackground").fadeIn(400, function() {
-		$("#popupwrap").show();
-	});
+	//$("#popupbackground").fadeIn(400, function() {
+	//	$("#popupwrap").show();
+	//});
 
 }
 
@@ -1767,11 +1800,16 @@ function chanceAction(chanceIndex) {
 	chanceCards[chanceIndex].action(p);
 
 	updateMoney();
+    
+    console.log("CHANCE INDEX!!!!! " + chanceIndex);
 
 	if (chanceIndex !== 15 && !p.human) {
 		p.AI.alertList = "";
-		game.next();
+		//game.next();
 	}
+    if([0, 1, 2, 3, 6, 8, 12].includes(chanceIndex)) {
+        game.next();
+    }
 }
 
 function communityChestAction(communityChestIndex) {
@@ -1783,10 +1821,15 @@ function communityChestAction(communityChestIndex) {
 
 	updateMoney();
 
+    console.log("COMMUNITY INDEX!!!!! " + communityChestIndex);
+    
 	if (communityChestIndex !== 15 && !p.human) {
 		p.AI.alertList = "";
-		game.next();
+		//game.next();
 	}
+    if(!([13, 15].includes(communityChestIndex))) {
+        game.next();
+    }
 }
 
 function addamount(amount, cause) {
@@ -2027,6 +2070,10 @@ function buyHouse(index) {
 	var p = player[sq.owner];
 	var houseSum = 0;
 	var hotelSum = 0;
+    
+    if(sq.mortgage || sq.hotel === 1) {
+        return false;
+    }
 
 	if (p.money - sq.houseprice < 0) {
 		if (sq.house == 4) {
@@ -2050,7 +2097,8 @@ function buyHouse(index) {
 
 			} else {
 				sq.house++;
-				addAlert(p.name + " placed a house on " + sq.name + ".");
+				console.log(p.name + " placed a house on " + sq.name + ".");
+				document.getElementById("cell" + index + "owner").innerHTML += '<div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
 			}
 
 		} else {
@@ -2060,7 +2108,8 @@ function buyHouse(index) {
 			} else {
 				sq.house = 5;
 				sq.hotel = 1;
-				addAlert(p.name + " placed a hotel on " + sq.name + ".");
+				console.log(p.name + " placed a hotel on " + sq.name + ".");
+				document.getElementById("cell" + index + "owner").innerHTML = '<div class="cell-position cell-hotel" title="house" style="display: inline-block;background-color: red; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
 			}
 		}
 
@@ -2079,12 +2128,15 @@ function sellHouse(index) {
 		sq.hotel = 0;
 		sq.house = 4;
 		addAlert(p.name + " sold the hotel on " + sq.name + ".");
-	} else {
+        document.getElementById("cell" + index + "owner").innerHTML = '<div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div><div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div><div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div><div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
+        p.money += sq.houseprice * 0.5;
+	} else if(sq.house > 0) {
 		sq.house--;
 		addAlert(p.name + " sold a house on " + sq.name + ".");
+        let element = document.querySelector('#cell' + index + 'owner .cell-house');
+        element.parentElement.removeChild(element);
+        p.money += sq.houseprice * 0.5;
 	}
-
-	p.money += sq.houseprice * 0.5;
 	updateOwned();
 	updateMoney();
 }
@@ -2259,6 +2311,7 @@ function mortgage(index) {
 	addAlert(p.name + " mortgaged " + sq.name + " for $" + mortgagePrice + ".");
 	updateOwned();
 	updateMoney();
+    document.querySelector('#cell' + index).classList.add('mortgaged');
 
 	return true;
 }
@@ -2280,6 +2333,7 @@ function unmortgage(index) {
 
 	addAlert(p.name + " unmortgaged " + sq.name + " for $" + unmortgagePrice + ".");
 	updateOwned();
+    document.querySelector('#cell' + index).classList.remove('mortgaged');
 	return true;
 }
 
@@ -2311,7 +2365,7 @@ function land(increasedRent) {
 		}
 
 
-		game.addPropertyToAuctionQueue(p.position);
+		//game.addPropertyToAuctionQueue(p.position);
 	}
 
 	// Collect rent
@@ -2394,7 +2448,7 @@ function land(increasedRent) {
 		updatePosition();
 
 		if (p.human) {
-			popup("<div>Go to jail. Go directly to Jail. Do not pass GO. Do not collect $200.</div>", goToJail);
+			popup("<div>Go to jail. Go directly to Jail. Do not pass GO. Do not collect $200.</div>", gotojail);
 		} else {
 			gotojail();
 		}
@@ -2460,7 +2514,7 @@ function roll() {
 
 
 			if (p.human) {
-				popup("You rolled doubles three times in a row. Go to jail.", goToJail);
+				popup("You rolled doubles three times in a row. Go to jail.", gotojail);
 			} else {
 				gotojail();
 			}
@@ -2615,6 +2669,12 @@ function play() {
 
 function setup() {
 	pcount = parseInt(document.getElementById("playernumber").value, 10);
+    playersGame = [];
+    
+    const els = document.querySelectorAll('.mortgaged');
+    for(const el of els) {
+        el.classList.remove('mortgaged');
+    }
 
 	var playerArray = new Array(pcount);
 	var p;
@@ -2624,7 +2684,6 @@ function setup() {
 	for (var i = 1; i <= pcount; i++) {
 		p = player[playerArray[i - 1]];
 
-
 		p.color = document.getElementById("player" + i + "color").value.toLowerCase();
 
 		if (document.getElementById("player" + i + "ai").value === "0") {
@@ -2633,11 +2692,19 @@ function setup() {
 		} else if (document.getElementById("player" + i + "ai").value === "1") {
 			p.human = false;
 			p.AI = new AITest(p);
+		} else if (document.getElementById("player" + i + "ai").value === "2"){
+			p.human = false;
+			p.AI = new AITest2(p);
+		} else if (document.getElementById("player" + i + "ai").value === "3"){
+			p.human = false;
+			p.AI = new AITest3(p, generateParameters());
+            playersGame.push(player[playerArray[i - 1]]);
 		}
 	}
 
 	$("#board, #moneybar").show();
 	$("#setup").hide();
+	$("#refresh").hide();
 
 	if (pcount === 2) {
 		document.getElementById("stats").style.width = "454px";
@@ -2647,7 +2714,7 @@ function setup() {
 
 	document.getElementById("stats").style.top = "0px";
 	document.getElementById("stats").style.left = "0px";
-
+	console.log("Starting the game!");
 	play();
 }
 
@@ -2663,6 +2730,10 @@ function setup() {
 		// element.checked = true;
 	// }
 // }
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function getCheckedProperty() {
 	for (var i = 0; i < 42; i++) {
@@ -2708,8 +2779,9 @@ function menuitem_onmouseout(element) {
 	return;
 }
 
-window.onload = function() {
+function onloadBehavior() {
 	game = new Game();
+	redefineGame();
 
 	for (var i = 0; i <= 8; i++) {
 		player[i] = new Player("", "");
@@ -2742,6 +2814,8 @@ window.onload = function() {
 	}
 
 	AITest.count = 0;
+	AITest2.count = 0;
+	AITest3.count = 0;
 
 	player[1].human = true;
 	player[0].name = "the bank";
@@ -2751,7 +2825,6 @@ window.onload = function() {
 
 	communityChestCards.deck = [];
 	chanceCards.deck = [];
-
 	for (var i = 0; i < 16; i++) {
 		chanceCards.deck[i] = i;
 		communityChestCards.deck[i] = i;
@@ -2768,6 +2841,7 @@ window.onload = function() {
 	$("#noscript").hide();
 	$("#setup, #noF5").show();
 
+	$('#enlargeWrap').remove();
 	var enlargeWrap = document.body.appendChild(document.createElement("div"));
 
 	enlargeWrap.id = "enlarge-wrap";
@@ -2792,6 +2866,7 @@ window.onload = function() {
 		s = square[i];
 
 		currentCell = document.getElementById("cell" + i);
+		currentCell.innerHTML = "";
 
 		currentCellAnchor = currentCell.appendChild(document.createElement("div"));
 		currentCellAnchor.id = "cell" + i + "anchor";
@@ -3014,5 +3089,20 @@ window.onload = function() {
 
 	$("#trade-menu-item").click(game.trade);
 
+    for(let i = 0; i < 40; i++) {
+        let c = square[i].color;
+        if(c !== '#FFFFFF') {
+            document.querySelector('#cell'+i).style.backgroundColor = 'rgba('+(parseInt(c.substr(1,2),16))+','+(parseInt(c.substr(3,2),16))+','+(parseInt(c.substr(5,2),16))+',0.25)';
+        }
+        else {
+            document.querySelector('#cell'+i).style.backgroundColor = c;
+        }
+    }
 
 };
+
+window.onload = onloadBehavior;
+
+function STOP() {
+    turn = -1;
+}

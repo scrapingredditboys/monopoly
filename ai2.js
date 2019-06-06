@@ -1,22 +1,22 @@
 // The purpose of this AI is not to be a relistic opponant, but to give an example of a vaild AI player.
-function AITest(p) {
+function AITest2(p) {
 	// When purchasing, what is the least amount of money the user should keep?
-	this.purchaseThreshold = 50;
+	this.purchaseThreshold = 150;
 	// When buying at home, what is the least amount of money the user should keep?
-	this.housePurchaseThreshold = 100;
+	this.housePurchaseThreshold = 50;
 	// If bid needs to be upped, by how much?
-	this.bidUp = 25;
+	this.bidUp = 50;
 	// At what value do we consider trade to be good enough?
-	this.tradeAcceptanceThreshold = 25;
+	this.tradeAcceptanceThreshold = 5;
 	// At what value is the trade not worthy of countering?
-	this.tradeRejectionThreshold = -50;
+	this.tradeRejectionThreshold = -40;
 
 	this.alertList = "";
 
 	// This variable is static, it is not related to each instance.
 	this.constructor.count++;
 
-	p.name = "AI 1 Player " + this.constructor.count;
+	p.name = "AI 2 Player " + this.constructor.count;
 
 	// Decide whether to buy a property the AI landed on.
 	// Return: boolean (true to buy).

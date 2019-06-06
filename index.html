@@ -8,7 +8,10 @@
 	<script type="text/javascript" src="classicedition.js"></script>
 	<!-- Comment out the previous line and uncomment the next one to enable the New York City Edition -->
 	<!-- <script type="text/javascript" src="newyorkcityedition.js"></script> -->
+    <script type="text/javascript" src="parametergen.js"></script>
 	<script type="text/javascript" src="ai.js"></script>
+	<script type="text/javascript" src="ai2.js"></script>
+	<script type="text/javascript" src="ai3.js"></script>
 	<script type="text/javascript" src="monopoly.js"></script>
 	<link rel="stylesheet" type="text/css" href="styles.css" />
 </head>
@@ -231,13 +234,17 @@
 						<div>$<span id="p7money">1500</span></div>
 					</td>
 				</tr>
-				<tr id="moneybarrow8">
-					<td style="border: none;" class="moneybararrowcell">&nbsp;</td>
-					<td style="border: none;">
-						<input type="button" id="viewstats" value="View stats" title="View a pop-up window that shows a list of each player's properties." />
-					</td>
-				</tr>
+				<tr id="moneybarrow8" class="money-bar-row">
+						<td class="moneybararrowcell"><img src="images/arrow.png" id="p8arrow" class="money-bar-arrow" alt=">" /></td>
+						<td id="p8moneybar" class="moneybarcell">
+							<div><span id="p8moneyname" >Player 7</span>:</div>
+							<div>$<span id="p8money">1500</span></div>
+						</td>
+					</tr>
 			</table>
+			<tr id="showStats">
+					<button onclick="showStats()">Show statistics</button>
+			</tr>
 		</div>
 	</div>
 
@@ -256,7 +263,7 @@
 		</div>
 
 		<div id="player1input" class="player-input">
-			Player 1: <input type="text" id="player1name" title="Player name" maxlength="16" value="Player 1" />
+			Player 1: <input type="text" id="player1name" title="Player name" maxlength="16" value="Player 1" disabled=true/>
 			<select id="player1color" title="Player color">
 				<option style="color: aqua;">Aqua</option>
 				<option style="color: black;">Black</option>
@@ -276,13 +283,13 @@
 				<option selected="selected" style="color: yellow;">Yellow</option>
 			</select>
 			<select id="player1ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player1name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="0">Human</option>
+				<option value="3" selected="selected">AI 3</option>
 			</select>
 		</div>
 
 		<div id="player2input" class="player-input">
-			Player 2: <input type="text" id="player2name" title="Player name" maxlength="16" value="Player 2" />
+			Player 2: <input type="text" id="player2name" title="Player name" maxlength="16" value="Player 2" disabled=true/>
 			<select id="player2color" title="Player color">
 				<option style="color: aqua;">Aqua</option>
 				<option style="color: black;">Black</option>
@@ -302,13 +309,13 @@
 				<option style="color: yellow;">Yellow</option>
 			</select>
 			<select id="player2ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player2name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="0">Human</option>
+				<option value="3" selected="selected">AI 3</option>
 			</select>
 		</div>
 
 		<div id="player3input" class="player-input">
-			Player 3: <input type="text" id="player3name" title="Player name" maxlength="16" value="Player 3" />
+			Player 3: <input type="text" id="player3name" title="Player name" maxlength="16" value="Player 3" disabled=true/>
 			<select id="player3color" title="Player color">
 				<option style="color: aqua;">Aqua</option>
 				<option style="color: black;">Black</option>
@@ -328,13 +335,13 @@
 				<option style="color: yellow;">Yellow</option>
 			</select>
 			<select id="player3ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player3name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="0">Human</option>
+				<option value="3" selected="selected">AI 3</option>
 			</select>
 		</div>
 
 		<div id="player4input" class="player-input">
-			Player 4: <input type="text" id="player4name" title="Player name" maxlength="16" value="Player 4" />
+			Player 4: <input type="text" id="player4name" title="Player name" maxlength="16" value="Player 4" disabled=true/>
 			<select id="player4color" title="Player color">
 				<option style="color: aqua;">Aqua</option>
 				<option style="color: black;">Black</option>
@@ -354,8 +361,8 @@
 				<option style="color: yellow;">Yellow</option>
 			</select>
 			<select id="player4ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player4name').disabled = this.value !== '0';">
-				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="0">Human</option>
+				<option value="3" selected="selected">AI 3</option>
 			</select>
 		</div>
 
@@ -381,7 +388,7 @@
 			</select>
 			<select id="player5ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player5name').disabled = this.value !== '0';">
 				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
@@ -407,7 +414,7 @@
 			</select>
 			<select id="player6ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player6name').disabled = this.value !== '0';">
 				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
@@ -433,7 +440,7 @@
 			</select>
 			<select id="player7ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player7name').disabled = this.value !== '0';">
 				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
@@ -459,7 +466,7 @@
 			</select>
 			<select id="player8ai" title="Choose whether this player is controled by a human or by the computer." onclick="document.getElementById('player8name').disabled = this.value !== '0';">
 				<option value="0" selected="selected">Human</option>
-				<option value="1">AI (Test)</option>
+				<option value="3">AI 3</option>
 			</select>
 		</div>
 
@@ -468,6 +475,11 @@
 		</div>
 
 		<div id="noF5">Note: Refreshing this page or navigating away from it may end your game without warning.</div>
+        
+        <textarea id="textarea"></textarea> <br>
+        <input type="button" value="Import" onclick="importData();" title="Import data" />
+        <input type="button" value="Export" onclick="exportData();" title="Export data" />
+        
 	</div>
 
 	<div id="control">
