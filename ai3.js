@@ -1,32 +1,33 @@
 // The purpose of this AI is not to be a relistic opponant, but to give an example of a vaild AI player.
-function AITest3(p) {
+function AITest3(p, params) {
+    this.params = params;
 	// When purchasing, what is the least amount of money the user should keep?
-	this.purchaseThreshold = 10;
+	this.purchaseThreshold = params.purchaseThreshold;
 	// When buying at home, what is the least amount of money the user should keep?
-	this.housePurchaseThreshold = 10;
+	this.housePurchaseThreshold = params.housePurchaseThreshold;
 	// If bid needs to be upped, by how much?
-	this.bidUp = 30;
+	this.bidUp = params.bidUp;
 	// At what value do we consider trade to be good enough?
-	this.tradeAcceptanceThreshold = 0;
+	this.tradeAcceptanceThreshold = params.tradeAcceptanceThreshold;
 	// At what value is the trade not worthy of countering?
-	this.tradeRejectionThreshold = -100;
+	this.tradeRejectionThreshold = params.tradeRejectionThreshold;
 	// How many spots behind is the agent willing to trade?
-	this.spotsBehind = 10;
+	this.spotsBehind = params.spotsBehind;
 	// How many spots in front of is the agent willing to trade?
-	this.spotsAhead = 10;
+	this.spotsAhead = params.spotsAhead;
 	// Value of a Community Get Out Of Jail Card
-	this.communityChestJailCardValue = 10;
+	this.communityChestJailCardValue = params.communityChestJailCardValue;
 	// Value of a Chance Get Out of Jail Card
-	this.chanceJailCardValue = 10;
+	this.chanceJailCardValue = params.chanceJailCardValue;
 
 	// Trade rejection amount
 	this.amountOfRejections = 0;
 	// Cap maximal amount of rejections
-	this.maxAmountOfRejections = 3;
+	this.maxAmountOfRejections = params.maxAmountOfRejections;
 	//Odds of buying the first buildings
-	this.firstBuildingOdds = 35;
+	this.firstBuildingOdds = params.firstBuildingOdds;
 	//Odds of buying the last buildings
-	this.lastBuildingOdds = 100;
+	this.lastBuildingOdds = params.lastBuildingOdds;
 
 	this.alertList = "";
 
@@ -146,7 +147,7 @@ function AITest3(p) {
 					continue;
 				}
 
-				if (p.money > leastHouseProperty.houseprice + this.housePurchaseThreshold) {
+				if (s.hotel === 0 && p.money > leastHouseProperty.houseprice + this.housePurchaseThreshold) {
 					console.log("Bought house!");
 					buyHouse(leastHouseProperty.index);
 				}
@@ -230,22 +231,24 @@ function AITest3(p) {
 						if (this.doNotOfferThose.includes(j)) continue;
 
 						var sj = square[j];
-						if (typeof sj.group !== 'undefined') {
-							var sum2 = 0;
-							//Find if he owns any property from a group that has exactly one property
-							sj.group.forEach(function(element) {
-								if (square[element].owner == p.index) {
-									sum2++;
-								}
-							}); 
-							//And don't make it a railroad, this is in a different spot below
-							if (sum2 < sj.group.length-1) {
-								if (j!=5 && j!=15 && j!=25 && j!=35) {
-									offeredUtility = j;
-									break;
-								}	
-							}
-						}
+                        if(sj) {
+                            if (typeof sj.group !== 'undefined') {
+                                var sum2 = 0;
+                                //Find if he owns any property from a group that has exactly one property
+                                sj.group.forEach(function(element) {
+                                    if (square[element].owner == p.index) {
+                                        sum2++;
+                                    }
+                                }); 
+                                //And don't make it a railroad, this is in a different spot below
+                                if (sum2 < sj.group.length-1) {
+                                    if (j!=5 && j!=15 && j!=25 && j!=35) {
+                                        offeredUtility = j;
+                                        break;
+                                    }	
+                                }
+                            }
+                        }
 					}
 					console.log("Offered utility = " + offeredUtility);
 					//Keep increasing the value of a bid until the other side agrees
@@ -332,12 +335,27 @@ function AITest3(p) {
 	// Return: void: don't return anything, just call the functions mortgage()/sellhouse()
 	this.payDebt = function() {
 		console.log("payDebt");
+        for (var i = 39; i >= 0; i--) {
+			s = square[i];
+
+			if (s.owner === p.index && !s.mortgage && s.house > 0) {
+                for(let j = s.house; j > 0; j--) {
+                    sellHouse(i);
+                    console.log("Selling house on " + s.name);
+                    
+                    if (p.money >= 0) {
+                        return;
+                    }
+                }
+			}
+		}
+        
 		for (var i = 39; i >= 0; i--) {
 			s = square[i];
 
 			if (s.owner === p.index && !s.mortgage && s.house === 0) {
 				mortgage(i);
-				console.log(s.name);
+				console.log("Mortgaging property " + s.name);
 			}
 
 			if (p.money >= 0) {

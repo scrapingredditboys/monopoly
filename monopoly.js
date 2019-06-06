@@ -1001,6 +1001,27 @@ function Game() {
 					// text += " " + square[i].landcount;
 			// }
 			// document.getElementById("refresh").innerHTML += "<br><br><div><textarea type='text' style='width: 980px;' onclick='javascript:select();' />" + text + "</textarea></div>";
+            const gameResults = [];
+            console.log(playersGame);
+            for(let p of playersGame) {
+                if(p.AI.params) {
+                    const pl = {
+                        params: p.AI.params,
+                        result: (p === player[1]) ? "win" : "lose"
+                    };
+                    gameResults.push(pl);
+                }
+            }
+            console.log(gameResults);
+            if(localStorage.getItem('gameHistory')) {
+                let gameHistory = JSON.parse(localStorage.getItem('gameHistory'));
+                gameHistory.push(gameResults);
+                localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+            } else {
+                let gameHistory = [];
+                gameHistory.push(gameResults);
+                localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+            }
 
 			document.getElementById("refresh").innerHTML = ("<p>Congratulations, " + player[1].name + " has won the game.</p><div>The game will restart in 5 seconds.</div>");
 		} else {
@@ -1114,7 +1135,7 @@ function Game() {
 }
 
 var game;
-
+localStorage.removeItem('gameHistory');
 
 function Player(name, color) {
 	this.name = name;
@@ -1184,6 +1205,7 @@ function Trade(initiator, recipient, money, property, communityChestJailCard, ch
 }
 
 var player = [];
+var playersGame = [];
 var pcount;
 var turn = 0, doublecount = 0;
 // Overwrite an array with numbers from one to the array's length in a random order.
@@ -2073,18 +2095,18 @@ function buyHouse(index) {
 			} else {
 				sq.house++;
 				console.log(p.name + " placed a house on " + sq.name + ".");
-				document.getElementById("cell" + index + "owner").innerHTML += '<div class="cell-position" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
+				document.getElementById("cell" + index + "owner").innerHTML += '<div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
 			}
 
 		} else {
-			if (hotelSum >= 12) {
+			if (hotelSum >= 12 || sq.hotel === 1) {
 				return;
 
 			} else {
 				sq.house = 5;
 				sq.hotel = 1;
 				console.log(p.name + " placed a hotel on " + sq.name + ".");
-				document.getElementById("cell" + index + "owner").innerHTML = '<div class="cell-position" title="house" style="display: inline-block;background-color: red; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
+				document.getElementById("cell" + index + "owner").innerHTML = '<div class="cell-position cell-hotel" title="house" style="display: inline-block;background-color: red; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
 			}
 		}
 
@@ -2103,12 +2125,15 @@ function sellHouse(index) {
 		sq.hotel = 0;
 		sq.house = 4;
 		addAlert(p.name + " sold the hotel on " + sq.name + ".");
-	} else {
+        document.getElementById("cell" + index + "owner").innerHTML = '<div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div><div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div><div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div><div class="cell-position cell-house" title="house" style="display: inline-block;background-color: green; border: 1px;border-style: solid;position:relative; vertical-align:middle"></div>';
+        p.money += sq.houseprice * 0.5;
+	} else if(sq.house > 0) {
 		sq.house--;
 		addAlert(p.name + " sold a house on " + sq.name + ".");
+        let element = document.querySelector('#cell' + index + 'owner .cell-house');
+        element.parentElement.removeChild(element);
+        p.money += sq.houseprice * 0.5;
 	}
-
-	p.money += sq.houseprice * 0.5;
 	updateOwned();
 	updateMoney();
 }
@@ -2283,6 +2308,7 @@ function mortgage(index) {
 	addAlert(p.name + " mortgaged " + sq.name + " for $" + mortgagePrice + ".");
 	updateOwned();
 	updateMoney();
+    document.querySelector('#cell' + index).classList.add('mortgaged');
 
 	return true;
 }
@@ -2304,6 +2330,7 @@ function unmortgage(index) {
 
 	addAlert(p.name + " unmortgaged " + sq.name + " for $" + unmortgagePrice + ".");
 	updateOwned();
+    document.querySelector('#cell' + index).classList.remove('mortgaged');
 	return true;
 }
 
@@ -2639,6 +2666,12 @@ function play() {
 
 function setup() {
 	pcount = parseInt(document.getElementById("playernumber").value, 10);
+    playersGame = [];
+    
+    const els = document.querySelectorAll('.mortgaged');
+    for(const el of els) {
+        el.classList.remove('mortgaged');
+    }
 
 	var playerArray = new Array(pcount);
 	var p;
@@ -2661,7 +2694,8 @@ function setup() {
 			p.AI = new AITest2(p);
 		} else if (document.getElementById("player" + i + "ai").value === "3"){
 			p.human = false;
-			p.AI = new AITest3(p);
+			p.AI = new AITest3(p, generateParameters());
+            playersGame.push(player[playerArray[i - 1]]);
 		}
 	}
 
