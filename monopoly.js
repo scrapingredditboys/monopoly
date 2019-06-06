@@ -1135,7 +1135,6 @@ function Game() {
 }
 
 var game;
-localStorage.removeItem('gameHistory');
 
 function Player(name, color) {
 	this.name = name;
@@ -2071,6 +2070,10 @@ function buyHouse(index) {
 	var p = player[sq.owner];
 	var houseSum = 0;
 	var hotelSum = 0;
+    
+    if(sq.mortgage || sq.hotel === 1) {
+        return false;
+    }
 
 	if (p.money - sq.houseprice < 0) {
 		if (sq.house == 4) {
@@ -2099,7 +2102,7 @@ function buyHouse(index) {
 			}
 
 		} else {
-			if (hotelSum >= 12 || sq.hotel === 1) {
+			if (hotelSum >= 12) {
 				return;
 
 			} else {
