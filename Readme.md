@@ -1,7 +1,7 @@
 # monopoly
 
-A JavaScript/HTML/CSS Monopoly implementation with full game play. Supports two-eight players.
+A JavaScript/HTML/CSS Monopoly implementation with full game play. Supports two-eight players. Remembers games that have been played and allows import/export of game history.
 
-Play online at [http://www.intrepidcoder.com/projects/monopoly/](http://www.intrepidcoder.com/projects/monopoly/).
+Play online at [https://scrapingredditboys.github.io/monopoly/](https://scrapingredditboys.github.io/monopoly/).
 
-Includes an experimental capability to play against an AI. A test AI for demonstration purposes is included.
+Includes generalised AI that picks decision parameters according to game history.
